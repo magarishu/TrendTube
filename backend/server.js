@@ -26,9 +26,16 @@ app.use(cors({
     // Allow requests from localhost with any port during development
     if (!origin || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
       callback(null, true);
-    } else if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) {
+    } 
+    // Allow requests from environment specified URLs (for production)
+    else if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) {
       callback(null, true);
-    } else {
+    }
+    // Allow any netlify.app domains for Netlify deployments
+    else if (origin && origin.includes('netlify.app')) {
+      callback(null, true);
+    }
+    else {
       callback(new Error('Not allowed by CORS'));
     }
   },
