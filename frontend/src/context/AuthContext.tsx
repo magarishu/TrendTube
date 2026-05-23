@@ -1,8 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-// Get API base URL from environment or use relative path as fallback
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
-
 interface User {
   id: string;
   email: string;
@@ -52,7 +49,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -86,7 +83,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/signup`, {
+      const response = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
