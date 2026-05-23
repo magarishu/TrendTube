@@ -32,8 +32,8 @@ const Login = () => {
 
     try {
       await login(email, password);
-      // Redirect to dashboard on successful login
-      navigate("/dashboard");
+      // Redirect to home on successful login
+      navigate("/");
     } catch (err) {
       // Error is handled by AuthContext
     }
