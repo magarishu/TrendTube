@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import apiClient from '@/services/apiClient';
 
 interface FavoriteVideo {
   videoId: string;
@@ -13,7 +14,7 @@ interface FavoriteVideo {
 }
 
 export const useFavorites = () => {
-  const { token } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [favorites, setFavorites] = useState<FavoriteVideo[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,26 +29,14 @@ export const useFavorites = () => {
       duration: string;
       publishedAt: string;
     }) => {
-      if (!token) {
+      if (!isAuthenticated) {
         setError('Please log in to add favorites');
         return false;
       }
 
       try {
         setLoading(true);
-        const response = await fetch('/api/auth/favorites/add', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(videoData),
-        });
-
-        if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.error || 'Failed to add to favorites');
-        }
+        await apiClient.favorites.add(videoData);
 
         // Update local state
         const favoriteWithDate: FavoriteVideo = {
@@ -58,52 +47,40 @@ export const useFavorites = () => {
         setError(null);
         return true;
       } catch (err: any) {
-        setError(err.message);
+        setError(err.message || 'Failed to add to favorites');
         console.error('Error adding to favorites:', err);
         return false;
       } finally {
         setLoading(false);
       }
     },
-    [token]
+    [isAuthenticated]
   );
 
   const removeFromFavorites = useCallback(
     async (videoId: string) => {
-      if (!token) {
+      if (!isAuthenticated) {
         setError('Please log in to manage favorites');
         return false;
       }
 
       try {
         setLoading(true);
-        const response = await fetch('/api/auth/favorites/remove', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ videoId }),
-        });
-
-        if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.error || 'Failed to remove from favorites');
-        }
+        await apiClient.favorites.remove(videoId);
 
         // Update local state
         setFavorites((prev) => prev.filter((fav) => fav.videoId !== videoId));
         setError(null);
         return true;
       } catch (err: any) {
-        setError(err.message);
+        setError(err.message || 'Failed to remove from favorites');
         console.error('Error removing from favorites:', err);
         return false;
       } finally {
         setLoading(false);
       }
     },
-    [token]
+    [isAuthenticated]
   );
 
   const isFavorite = useCallback(
@@ -115,58 +92,38 @@ export const useFavorites = () => {
 
   const checkFavoriteStatus = useCallback(
     async (videoId: string) => {
-      if (!token) {
+      if (!isAuthenticated) {
         return false;
       }
 
       try {
-        const response = await fetch(`/api/auth/favorites/check/${videoId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to check favorite status');
-        }
-
-        const data = await response.json();
-        return data.data.isFavorite;
+        const response = await apiClient.favorites.check(videoId);
+        return response.data?.isFavorite || false;
       } catch (err) {
         console.error('Error checking favorite status:', err);
         return false;
       }
     },
-    [token]
+    [isAuthenticated]
   );
 
   const fetchFavorites = useCallback(async () => {
-    if (!token) {
+    if (!isAuthenticated) {
       return;
     }
 
     try {
       setLoading(true);
-      const response = await fetch('/api/auth/favorites', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch favorites');
-      }
-
-      const data = await response.json();
-      setFavorites(data.data.favorites);
+      const response = await apiClient.favorites.getAll();
+      setFavorites(response.data?.favorites || []);
       setError(null);
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || 'Failed to fetch favorites');
       console.error('Error fetching favorites:', err);
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, [isAuthenticated]);
 
   return {
     favorites,

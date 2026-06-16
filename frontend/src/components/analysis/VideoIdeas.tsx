@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { Lightbulb, Loader, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-
+import { toast } from "sonner";
+import apiClient from "@/services/apiClient";
 interface VideoIdeasProps {
   videoData: {
     title: string;
@@ -13,6 +14,7 @@ interface VideoIdeasProps {
 const VideoIdeas = ({ videoData }: VideoIdeasProps) => {
   const [ideas, setIdeas] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [savingIdeas, setSavingIdeas] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
     generateIdeas();
@@ -52,6 +54,21 @@ const VideoIdeas = ({ videoData }: VideoIdeasProps) => {
       `"${topic} in 60 Seconds" - Fast-paced, snackable content perfect for shorts`,
       `"Day in the Life with ${topic}" - Vlog-style content showing real-world application`,
     ];
+  };
+
+  const handleSaveIdea = async (idea: string, idx: number) => {
+    setSavingIdeas((prev) => ({ ...prev, [idx]: true }));
+    try {
+      await apiClient.savedIdeas.save({
+        type: 'title',
+        title: idea,
+      });
+      toast.success("Idea saved successfully!");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to save idea");
+    } finally {
+      setSavingIdeas((prev) => ({ ...prev, [idx]: false }));
+    }
   };
 
   return (
@@ -97,6 +114,17 @@ const VideoIdeas = ({ videoData }: VideoIdeasProps) => {
                     {idx % 2 === 0 && <Badge className="bg-[#3B82F6] hover:bg-[#2563EB] text-white border-0">Trending</Badge>}
                     <Badge className="bg-[#22C55E] hover:bg-[#16A34A] text-white border-0">Actionable</Badge>
                   </div>
+                </div>
+                <div className="flex flex-col justify-start">
+                  <Button
+                    onClick={() => handleSaveIdea(idea, idx)}
+                    disabled={savingIdeas[idx]}
+                    variant="outline"
+                    size="sm"
+                    className="border-gray-700 text-white hover:bg-white/10"
+                  >
+                    {savingIdeas[idx] ? <Loader className="h-4 w-4 animate-spin" /> : "Save"}
+                  </Button>
                 </div>
               </div>
             </div>

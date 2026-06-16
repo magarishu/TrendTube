@@ -1,5 +1,7 @@
 import express from 'express';
 import axios from 'axios';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import cacheMiddleware from '../utils/cacheMiddleware.js';
 
 const router = express.Router();
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
@@ -44,7 +46,7 @@ router.get('/debug', (req, res) => {
 });
 
 // Analyze video title and suggest improvements
-router.post('/analyze-title', async (req, res) => {
+router.post('/analyze-title', cacheMiddleware(3600), async (req, res) => {
   try {
     const { title } = req.body;
 
@@ -85,7 +87,7 @@ Please provide your response in JSON format with the following structure:
 });
 
 // Generate video description
-router.post('/generate-description', async (req, res) => {
+router.post('/generate-description', cacheMiddleware(3600), async (req, res) => {
   try {
     const { title, keywords = [], topic = '' } = req.body;
 
@@ -129,7 +131,7 @@ Please provide just the description without any additional text.`;
 });
 
 // Generate content ideas
-router.post('/generate-ideas', async (req, res) => {
+router.post('/generate-ideas', cacheMiddleware(3600), async (req, res) => {
   try {
     const { topic, count = 5, style = 'engaging' } = req.body;
 
@@ -167,7 +169,7 @@ Please provide the response in JSON format as an array of objects.`;
 });
 
 // Analyze video thumbnail text
-router.post('/analyze-thumbnail', async (req, res) => {
+router.post('/analyze-thumbnail', cacheMiddleware(3600), async (req, res) => {
   try {
     const { text, context = '' } = req.body;
 

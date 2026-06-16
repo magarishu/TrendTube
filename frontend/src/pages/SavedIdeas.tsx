@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, Trash2, Copy, Loader } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import apiClient from '@/services/apiClient';
 
 interface SavedIdea {
   _id: string;
@@ -33,15 +34,9 @@ const SavedIdeas = () => {
     setError(null);
 
     try {
-      const response = await fetch('/api/saved-ideas?type=title');
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch saved ideas');
-      }
-
-      const result = await response.json();
-      setIdeas(result.data.ideas || []);
-      console.log('Saved ideas loaded:', result.data.ideas);
+      const result = await apiClient.savedIdeas.getAll('title');
+      setIdeas(result.data?.ideas || []);
+      console.log('Saved ideas loaded:', result.data?.ideas);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'An error occurred';
       setError(message);
@@ -54,13 +49,7 @@ const SavedIdeas = () => {
   const deleteIdea = async (id: string) => {
     setDeletingId(id);
     try {
-      const response = await fetch(`/api/saved-idea/${id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete idea');
-      }
+      await apiClient.savedIdeas.delete(id);
 
       setIdeas(ideas.filter(idea => idea._id !== id));
       console.log('Idea deleted successfully');

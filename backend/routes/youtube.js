@@ -1,12 +1,13 @@
 import express from 'express';
 import axios from 'axios';
+import cacheMiddleware from '../utils/cacheMiddleware.js';
 
 const router = express.Router();
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
 const YOUTUBE_API_BASE = 'https://www.googleapis.com/youtube/v3';
 
-// Search videos on YouTube
-router.get('/search', async (req, res) => {
+// Search videos on YouTube (Cached for 15 minutes)
+router.get('/search', cacheMiddleware(900), async (req, res) => {
   try {
     const { query, maxResults = 50, pageToken } = req.query;
 
@@ -110,8 +111,8 @@ router.get('/search-channel', async (req, res) => {
   }
 });
 
-// Get video statistics
-router.get('/video/:videoId', async (req, res) => {
+// Get video statistics (Cached for 1 hour)
+router.get('/video/:videoId', cacheMiddleware(3600), async (req, res) => {
   try {
     const { videoId } = req.params;
 
@@ -140,8 +141,8 @@ router.get('/video/:videoId', async (req, res) => {
   }
 });
 
-// Get channel information
-router.get('/channel/:channelId', async (req, res) => {
+// Get channel information (Cached for 1 hour)
+router.get('/channel/:channelId', cacheMiddleware(3600), async (req, res) => {
   try {
     const { channelId } = req.params;
 
@@ -170,8 +171,8 @@ router.get('/channel/:channelId', async (req, res) => {
   }
 });
 
-// Get channel videos
-router.get('/channel/:channelId/videos', async (req, res) => {
+// Get channel videos (Cached for 15 minutes)
+router.get('/channel/:channelId/videos', cacheMiddleware(900), async (req, res) => {
   try {
     const { channelId } = req.params;
     const { maxResults = 50, pageToken } = req.query;
@@ -217,8 +218,8 @@ router.get('/channel/:channelId/videos', async (req, res) => {
   }
 });
 
-// Get trending videos
-router.get('/trending', async (req, res) => {
+// Get trending videos (Cached for 30 minutes)
+router.get('/trending', cacheMiddleware(1800), async (req, res) => {
   try {
     const { regionCode = 'US', maxResults = 50, pageToken } = req.query;
 

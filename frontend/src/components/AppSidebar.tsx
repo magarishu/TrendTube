@@ -13,8 +13,12 @@ const navItems = [
   { to: "/video-analyzer", icon: Play, label: "Video Analyzer" },
 ];
 
-const AppSidebar = () => {
-  const [collapsed, setCollapsed] = useState(false);
+interface AppSidebarProps {
+  collapsed: boolean;
+  setCollapsed: (val: boolean) => void;
+}
+
+const AppSidebar = ({ collapsed, setCollapsed }: AppSidebarProps) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -36,7 +40,9 @@ const AppSidebar = () => {
               key={item.to}
               to={item.to}
               onClick={() => setMobileOpen(false)}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
+              className={`flex items-center gap-3 rounded-lg py-2.5 text-sm font-medium transition-all duration-150 ${
+                collapsed ? "justify-center px-0" : "px-3"
+              } ${
                 active
                   ? "bg-[#FF0000] text-white shadow-lg"
                   : "text-[#A0A0A0] hover:bg-[#121212] hover:text-[#FFFFFF]"
@@ -86,28 +92,26 @@ const AppSidebar = () => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-0 z-50 h-screen border-r border-gray-700 bg-[#030303] flex flex-col transition-all duration-150 ${
+        className={`fixed left-0 top-0 z-50 h-screen bg-[#030303] flex flex-col transition-all duration-150 ${
           collapsed ? "w-16" : "w-56"
         } ${mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
       >
         {/* Logo */}
-        <div className="flex h-14 items-center justify-between border-b border-gray-700 px-4">
-          <div className="flex items-center gap-2">
-            <div className="p-2 bg-[#FF0000] rounded-lg flex-shrink-0">
-              <TrendingUp className="h-5 w-5 text-white" />
-            </div>
-            {!collapsed && (
-              <span className="text-lg font-bold text-[#FFFFFF]">
-                TrendTube
-              </span>
-            )}
-          </div>
+        <div className="flex h-14 w-56 items-center gap-3 px-4 shrink-0">
           <button
             onClick={() => setCollapsed(!collapsed)}
             className="hidden lg:flex h-7 w-7 items-center justify-center rounded-sm text-[#A0A0A0] hover:text-[#FFFFFF] hover:bg-[#1A1A1A] transition-colors"
           >
-            <Menu className="h-3.5 w-3.5" />
+            <Menu className="h-4 w-4" />
           </button>
+          <div className="flex items-center gap-2">
+            <div className="p-2 bg-[#FF0000] rounded-lg flex-shrink-0">
+              <TrendingUp className="h-5 w-5 text-white" />
+            </div>
+            <span className="text-lg font-bold text-[#FFFFFF] whitespace-nowrap">
+              TrendTube
+            </span>
+          </div>
         </div>
 
         {sidebarContent}

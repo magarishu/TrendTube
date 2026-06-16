@@ -1,13 +1,14 @@
 import express from 'express';
+import { requireAuth } from '@clerk/express';
 import SavedIdea from '../models/SavedIdea.js';
 
 const router = express.Router();
 
 // Save an idea (title or thumbnail)
-router.post('/save-idea', async (req, res) => {
+router.post('/save-idea', requireAuth(), async (req, res) => {
   try {
+    const userId = req.auth.userId;
     const {
-      userId = 'guest',
       type,
       videoId,
       title,
@@ -74,9 +75,10 @@ router.post('/save-idea', async (req, res) => {
 });
 
 // Get all saved ideas for a user
-router.get('/saved-ideas', async (req, res) => {
+router.get('/saved-ideas', requireAuth(), async (req, res) => {
   try {
-    const { userId = 'guest', type } = req.query;
+    const userId = req.auth.userId;
+    const { type } = req.query;
 
     console.log('[Get Saved Ideas] Fetching ideas for user:', userId, 'type:', type);
 
@@ -108,10 +110,10 @@ router.get('/saved-ideas', async (req, res) => {
 });
 
 // Delete a saved idea
-router.delete('/saved-idea/:id', async (req, res) => {
+router.delete('/saved-idea/:id', requireAuth(), async (req, res) => {
   try {
     const { id } = req.params;
-    const { userId = 'guest' } = req.query;
+    const userId = req.auth.userId;
 
     console.log('[Delete Saved Idea] Deleting idea:', id, 'for user:', userId);
 

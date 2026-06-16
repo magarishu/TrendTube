@@ -2,14 +2,20 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const apiClient = {
-  // Generic request handler
   async request(endpoint, options: RequestInit = {}) {
     try {
+      const token = localStorage.getItem('authToken');
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        ...(options.headers as Record<string, string> || {}),
+      };
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          ...(options.headers as Record<string, string>),
-        },
+        headers,
         ...options,
       });
 
@@ -116,6 +122,29 @@ const apiClient = {
 
   // Health check
   health: () => apiClient.request('/health'),
+  // Saved Ideas endpoints
+  savedIdeas: {
+    save: (data) => apiClient.request('/saved-ideas/save-idea', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    getAll: (type?: string) => apiClient.request(`/saved-ideas/saved-ideas${type ? `?type=${type}` : ''}`),
+    delete: (id) => apiClient.request(`/saved-ideas/saved-idea/${id}`, { method: 'DELETE' }),
+  },
+
+  // Favorites endpoints
+  favorites: {
+    add: (data) => apiClient.request('/auth/favorites/add', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    remove: (videoId) => apiClient.request('/auth/favorites/remove', {
+      method: 'POST',
+      body: JSON.stringify({ videoId }),
+    }),
+    getAll: () => apiClient.request('/auth/favorites'),
+    check: (videoId) => apiClient.request(`/auth/favorites/check/${videoId}`),
+  },
 };
 
 export default apiClient;

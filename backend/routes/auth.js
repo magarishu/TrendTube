@@ -1,151 +1,41 @@
 import express from 'express';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import { requireAuth } from '@clerk/express';
 import User from '../models/User.js';
 
 const router = express.Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
-// Sign up
-router.post('/signup', async (req, res) => {
-  try {
-    const { email, password, username } = req.body;
-
-    // Validation
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required' });
-    }
-
-    if (password.length < 6) {
-      return res.status(400).json({ error: 'Password must be at least 6 characters' });
-    }
-
-    // Check if user already exists
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
-    if (existingUser) {
-      return res.status(409).json({ error: 'Email already in use' });
-    }
-
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create new user
-    const user = new User({
-      email: email.toLowerCase(),
-      password: hashedPassword,
-      username: username || email.split('@')[0],
-    });
-
+// Helper to sync Clerk user with MongoDB
+const getOrCreateUser = async (clerkId) => {
+  let user = await User.findOne({ clerkId });
+  if (!user) {
+    user = new User({ clerkId });
     await user.save();
-
-    // Generate token
-    const token = jwt.sign(
-      { userId: user._id, email: user.email },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
-    res.status(201).json({
-      message: 'User created successfully',
-      token,
-      user: {
-        id: user._id,
-        email: user.email,
-        username: user.username,
-        subscription: user.subscription,
-      },
-    });
-  } catch (error) {
-    console.error('Signup error:', error);
-    res.status(500).json({ error: 'Failed to create user' });
   }
-});
-
-// Login
-router.post('/login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    // Validation
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required' });
-    }
-
-    // Find user
-    const user = await User.findOne({ email: email.toLowerCase() });
-    if (!user) {
-      return res.status(401).json({ error: 'Invalid email or password' });
-    }
-
-    // Check password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(401).json({ error: 'Invalid email or password' });
-    }
-
-    // Generate token
-    const token = jwt.sign(
-      { userId: user._id, email: user.email },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
-    res.json({
-      message: 'Login successful',
-      token,
-      user: {
-        id: user._id,
-        email: user.email,
-        username: user.username,
-        subscription: user.subscription,
-      },
-    });
-  } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ error: 'Failed to login' });
-  }
-});
-
-// Verify token
-router.post('/verify', (req, res) => {
-  try {
-    const { token } = req.body;
-
-    if (!token) {
-      return res.status(400).json({ error: 'Token is required' });
-    }
-
-    const decoded = jwt.verify(token, JWT_SECRET);
-    res.json({
-      message: 'Token is valid',
-      user: {
-        userId: decoded.userId,
-        email: decoded.email,
-      },
-    });
-  } catch (error) {
-    res.status(401).json({ error: 'Invalid or expired token' });
-  }
-});
-
-// Middleware to verify token
-const verifyToken = (req, res, next) => {
-  try {
-    const token = req.headers.authorization?.split(' ')[1];
-    if (!token) {
-      return res.status(401).json({ error: 'Token is required' });
-    }
-    const decoded = jwt.verify(token, JWT_SECRET);
-    req.userId = decoded.userId;
-    req.userEmail = decoded.email;
-    next();
-  } catch (error) {
-    res.status(401).json({ error: 'Invalid or expired token' });
-  }
+  return user;
 };
 
+// TEST ENDPOINT to figure out why 500 error happens
+router.post('/test-favorite', async (req, res) => {
+  try {
+    const videoId = "test12345";
+    const title = "Test title";
+    const clerkId = "test_clerk_id_123";
+    
+    const user = await getOrCreateUser(clerkId);
+    if (!user.favoriteVideosMetadata) user.favoriteVideosMetadata = [];
+    user.favoriteVideosMetadata.push({
+      videoId, title, channel: "Test", thumbnail: "Test", views: "10", duration: "10", publishedAt: "2023"
+    });
+    await user.save();
+    res.json({ message: "Success", user });
+  } catch (error) {
+    console.error('Test error:', error);
+    res.status(500).json({ error: error.message, stack: error.stack, name: error.name });
+  }
+});
+
 // Add video to favorites
-router.post('/favorites/add', verifyToken, async (req, res) => {
+router.post('/favorites/add', requireAuth(), async (req, res) => {
   try {
     const { videoId, title, channel, thumbnail, views, duration, publishedAt } = req.body;
 
@@ -153,13 +43,10 @@ router.post('/favorites/add', verifyToken, async (req, res) => {
       return res.status(400).json({ error: 'videoId and title are required' });
     }
 
-    const user = await User.findById(req.userId);
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
+    const user = await getOrCreateUser(req.auth.userId);
 
     // Check if video is already in favorites
-    const isAlreadyFavorite = user.favoriteVideos.some(id => id.toString() === videoId);
+    const isAlreadyFavorite = user.favoriteVideosMetadata?.some(fav => fav.videoId === videoId);
     if (isAlreadyFavorite) {
       return res.status(400).json({ error: 'Video is already in favorites' });
     }
@@ -188,12 +75,12 @@ router.post('/favorites/add', verifyToken, async (req, res) => {
     });
   } catch (error) {
     console.error('Error adding to favorites:', error);
-    res.status(500).json({ error: 'Failed to add video to favorites' });
+    res.status(500).json({ error: 'Failed to add video to favorites', details: error.message, stack: error.stack });
   }
 });
 
 // Remove video from favorites
-router.post('/favorites/remove', verifyToken, async (req, res) => {
+router.post('/favorites/remove', requireAuth(), async (req, res) => {
   try {
     const { videoId } = req.body;
 
@@ -201,10 +88,7 @@ router.post('/favorites/remove', verifyToken, async (req, res) => {
       return res.status(400).json({ error: 'videoId is required' });
     }
 
-    const user = await User.findById(req.userId);
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
+    const user = await getOrCreateUser(req.auth.userId);
 
     // Remove from metadata
     if (user.favoriteVideosMetadata) {
@@ -221,18 +105,14 @@ router.post('/favorites/remove', verifyToken, async (req, res) => {
     });
   } catch (error) {
     console.error('Error removing from favorites:', error);
-    res.status(500).json({ error: 'Failed to remove video from favorites' });
+    res.status(500).json({ error: 'Failed to remove video from favorites', details: error.message });
   }
 });
 
 // Get user's favorite videos
-router.get('/favorites', verifyToken, async (req, res) => {
+router.get('/favorites', requireAuth(), async (req, res) => {
   try {
-    const user = await User.findById(req.userId);
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
+    const user = await getOrCreateUser(req.auth.userId);
     const favorites = user.favoriteVideosMetadata || [];
 
     res.json({
@@ -249,14 +129,10 @@ router.get('/favorites', verifyToken, async (req, res) => {
 });
 
 // Check if video is in favorites
-router.get('/favorites/check/:videoId', verifyToken, async (req, res) => {
+router.get('/favorites/check/:videoId', requireAuth(), async (req, res) => {
   try {
     const { videoId } = req.params;
-
-    const user = await User.findById(req.userId);
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
+    const user = await getOrCreateUser(req.auth.userId);
 
     const isFavorite = user.favoriteVideosMetadata?.some(fav => fav.videoId === videoId) || false;
 

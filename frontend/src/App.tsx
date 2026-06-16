@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -15,12 +16,14 @@ import VideoAnalyzer from "./pages/VideoAnalyzer";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
+import { AuthenticateWithRedirectCallback } from "@clerk/clerk-react";
 
 const queryClient = new QueryClient();
 
 // Protected Route Wrapper Component
 const ProtectedLayoutRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, loading } = useAuth();
+  const [collapsed, setCollapsed] = useState(false);
 
   if (loading) {
     return (
@@ -36,8 +39,8 @@ const ProtectedLayoutRoute = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="flex min-h-screen bg-[#030303]">
-      <AppSidebar />
-      <div className="flex-1 flex flex-col w-full lg:ml-56 overflow-hidden">
+      <AppSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+      <div className={`flex-1 flex flex-col w-full overflow-hidden transition-all duration-150 ${collapsed ? "lg:ml-48" : "lg:ml-56"}`}>
         <main className="flex-1 p-6 lg:p-10 overflow-auto">
           {children}
         </main>
@@ -67,6 +70,7 @@ const AppRoutes = () => {
       />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
+      <Route path="/sso-callback" element={<AuthenticateWithRedirectCallback signUpForceRedirectUrl="/" />} />
 
       {/* Protected Routes - wrapped with ProtectedLayoutRoute */}
       <Route
