@@ -104,10 +104,8 @@ const AppSidebar = ({ collapsed, setCollapsed }: AppSidebarProps) => {
           >
             <Menu className="h-4 w-4" />
           </button>
-          <div className="flex items-center gap-2">
-            <div className="p-2 bg-[#FF0000] rounded-lg flex-shrink-0">
-              <TrendingUp className="h-5 w-5 text-white" />
-            </div>
+          <div className="flex items-center gap-3">
+            <img src="/logo.png" alt="TrendTube Logo" className="h-8 w-auto rounded-md" />
             <span className="text-lg font-bold text-[#FFFFFF] whitespace-nowrap">
               TrendTube
             </span>

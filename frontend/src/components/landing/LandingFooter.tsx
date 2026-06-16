@@ -7,10 +7,8 @@ export const LandingFooter = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           <div className="col-span-1 md:col-span-1">
-            <Link to="/" className="flex items-center gap-2 mb-4">
-              <div className="p-2 bg-[#FF0000] rounded-lg">
-                <TrendingUp className="h-5 w-5 text-white" />
-              </div>
+            <Link to="/" className="flex items-center gap-3 mb-4">
+              <img src="/logo.png" alt="TrendTube Logo" className="h-8 w-auto rounded-md" />
               <span className="text-xl font-bold text-white tracking-tight">TrendTube</span>
             </Link>
             <p className="text-white/50 text-sm leading-relaxed">

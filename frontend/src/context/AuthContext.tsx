@@ -95,13 +95,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const loginWithGoogle = () => {
+  const loginWithGoogle = async () => {
     if (!isSignInLoaded) return;
-    signIn.authenticateWithRedirect({
-      strategy: "oauth_google",
-      redirectUrl: "/sso-callback",
-      redirectUrlComplete: "/",
-    });
+    setLoading(true);
+    setError(null);
+    try {
+      await signIn.authenticateWithRedirect({
+        strategy: "oauth_google",
+        redirectUrl: "/sso-callback",
+        redirectUrlComplete: "/",
+      });
+    } catch (err: any) {
+      console.error('Google login error:', err);
+      const errorMessage = err.errors?.[0]?.message || err.message || 'Failed to login with Google';
+      setError(errorMessage);
+      setLoading(false); // Only set false on error, as success redirects the page
+    }
   };
 
   const signup = async (email: string, password: string) => {
@@ -112,7 +121,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const result = await signUp.create({
         emailAddress: email,
         password,
-        username,
       });
 
       if (result.status === 'COMPLETE') {

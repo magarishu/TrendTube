@@ -94,7 +94,8 @@ const Signup = () => {
     <div className="min-h-screen bg-[#030303] flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo and Title */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 flex flex-col items-center">
+          <img src="/logo.png" alt="TrendTube Logo" className="h-16 w-auto mb-4 rounded-xl" />
           <h1 className="text-3xl font-bold text-white mb-2">TrendTube</h1>
           <p className="text-muted-foreground">Create your account</p>
         </div>

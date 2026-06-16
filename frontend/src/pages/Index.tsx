@@ -67,10 +67,8 @@ const Index = () => {
         {/* Navigation */}
         <nav className="fixed top-0 w-full z-50 border-b border-white/5 bg-[#030303]/50 backdrop-blur-xl">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-2 group">
-              <div className="p-2 bg-[#FF0000] rounded-lg group-hover:bg-[#FF0000]/90 transition-colors">
-                <TrendingUp className="h-5 w-5 text-white" />
-              </div>
+            <Link to="/" className="flex items-center gap-3 group">
+              <img src="/logo.png" alt="TrendTube Logo" className="h-8 w-auto rounded-md group-hover:opacity-90 transition-opacity" />
               <span className="text-xl font-bold text-white tracking-tight">TrendTube</span>
             </Link>
             <div className="flex items-center gap-4">
