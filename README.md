@@ -1,7 +1,6 @@
 <div align="center">
-  <img src="frontend/public/logo.png" alt="TrendTube Logo" width="120" style="border-radius: 20px;" />
-
-  # 🚀 TrendTube
+  <img src="frontend/public/logo.png" alt="TrendTube" width="150" />
+  <h1>TrendTube</h1>
 
   **The AI-Powered Analytics & Growth Engine for YouTube Creators**
 

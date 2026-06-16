@@ -123,8 +123,9 @@ const Dashboard = () => {
 
       {/* Main Search Section */}
       <div className="bg-card border border-border rounded-lg p-8 shadow-md hover:shadow-lg transition-shadow">
-        <div className="flex justify-center mb-6">
-          <img src="/logo.png" alt="TrendTube Logo" className="h-20 w-auto rounded-xl" />
+        <div className="flex flex-col items-center justify-center mb-8 gap-3">
+          <img src="/logo.png" alt="TrendTube Logo" className="h-20 w-auto rounded-2xl shadow-sm" />
+          <h2 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">TrendTube</h2>
         </div>
         <form onSubmit={handleTrendSearch} className="mb-6">
           <div className="flex gap-2">
