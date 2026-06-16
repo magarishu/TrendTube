@@ -38,10 +38,21 @@ YouTube creators face a highly competitive landscape where data-driven decisions
 ## 4. Screenshots
 
 <div align="center">
-  <img src="https://via.placeholder.com/800x450/09090b/ffffff?text=Dashboard+%26+Trends" alt="Dashboard" width="49%">
-  <img src="https://via.placeholder.com/800x450/09090b/ffffff?text=Audience+Retention" alt="Retention" width="49%">
-  <img src="https://via.placeholder.com/800x450/09090b/ffffff?text=AI+Thumbnail+Generator" alt="Thumbnails" width="49%">
-  <img src="https://via.placeholder.com/800x450/09090b/ffffff?text=Earnings+Estimator" alt="Earnings" width="49%">
+  <img src="frontend/public/project-SS/Screenshot%202026-06-16%20105108.png" alt="Screenshot 1" width="49%">
+  <img src="frontend/public/project-SS/Screenshot%202026-06-16%20105141.png" alt="Screenshot 2" width="49%">
+  <img src="frontend/public/project-SS/Screenshot%202026-06-16%20105152.png" alt="Screenshot 3" width="49%">
+  <img src="frontend/public/project-SS/Screenshot%202026-06-16%20105328.png" alt="Screenshot 4" width="49%">
+  <img src="frontend/public/project-SS/Screenshot%202026-06-16%20105409.png" alt="Screenshot 5" width="49%">
+  <img src="frontend/public/project-SS/Screenshot%202026-06-16%20105417.png" alt="Screenshot 6" width="49%">
+  <img src="frontend/public/project-SS/Screenshot%202026-06-16%20105433.png" alt="Screenshot 7" width="49%">
+  <img src="frontend/public/project-SS/Screenshot%202026-06-16%20105443.png" alt="Screenshot 8" width="49%">
+  <img src="frontend/public/project-SS/Screenshot%202026-06-16%20105501.png" alt="Screenshot 9" width="49%">
+  <img src="frontend/public/project-SS/Screenshot%202026-06-16%20105518.png" alt="Screenshot 10" width="49%">
+  <img src="frontend/public/project-SS/Screenshot%202026-06-16%20105530.png" alt="Screenshot 11" width="49%">
+  <img src="frontend/public/project-SS/Screenshot%202026-06-16%20105545.png" alt="Screenshot 12" width="49%">
+  <img src="frontend/public/project-SS/Screenshot%202026-06-16%20105557.png" alt="Screenshot 13" width="49%">
+  <img src="frontend/public/project-SS/Screenshot%202026-06-16%20105605.png" alt="Screenshot 14" width="49%">
+  <img src="frontend/public/project-SS/Screenshot%202026-06-16%20105613.png" alt="Screenshot 15" width="49%">
 </div>
 
 ## 5. Architecture
