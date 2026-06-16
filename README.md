@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="frontend/public/logo.png" alt="TrendTube" width="150" />
+  <img src="https://raw.githubusercontent.com/magarishu/TrendTube/main/frontend/public/logo.png" alt="TrendTube" width="150" />
   <h1>TrendTube</h1>
 
   **The AI-Powered Analytics & Growth Engine for YouTube Creators**
