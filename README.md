@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://via.placeholder.com/150/09090b/ffffff?text=TT" alt="TrendTube Logo" width="120" style="border-radius: 20px;" />
+  <img src="frontend/public/logo.png" alt="TrendTube Logo" width="120" style="border-radius: 20px;" />
 
   # 🚀 TrendTube
 
