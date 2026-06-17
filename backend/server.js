@@ -60,8 +60,9 @@ app.use('/api', apiLimiter); // Apply rate limiter to all API routes
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests from localhost with any port during development
     if (!origin || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
+      callback(null, true);
+    } else if (origin.endsWith('.vercel.app')) {
       callback(null, true);
     } else if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) {
       callback(null, true);
