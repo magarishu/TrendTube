@@ -11,6 +11,18 @@ import rateLimit from 'express-rate-limit';
 import morgan from 'morgan';
 import logger from './utils/logger.js';
 
+// Route Imports
+import authRoutes from './routes/auth.js';
+import videoRoutes from './routes/videos.js';
+import creatorRoutes from './routes/creators.js';
+import categoryRoutes from './routes/categories.js';
+import analyticsRoutes from './routes/analytics.js';
+import youtubeRoutes from './routes/youtube.js';
+import trendsRoutes from './routes/trends.js';
+import geminiRoutes from './routes/gemini.js';
+import collectRoutes from './routes/collect.js';
+import videoAnalyzerRoutes from './routes/video.js';
+import savedIdeasRoutes from './routes/savedIdeas.js';
 // Load environment variables FIRST
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -98,78 +110,47 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Dynamically import routes after env is loaded
-async function loadRoutes() {
-  try {
-    // Connect to MongoDB first (but don't fail if it's unavailable)
-    console.log('\n[Startup] Attempting MongoDB connection...');
-    const dbConnection = await connectDB();
+// Connect to MongoDB immediately (Mongoose buffers queries until connected)
+console.log('\n[Startup] Attempting MongoDB connection...');
+connectDB().catch(err => console.error('[Startup Error]', err));
 
-    console.log('[Startup] Importing route modules...');
-    const authRoutes = (await import('./routes/auth.js')).default;
-    const videoRoutes = (await import('./routes/videos.js')).default;
-    const creatorRoutes = (await import('./routes/creators.js')).default;
-    const categoryRoutes = (await import('./routes/categories.js')).default;
-    const analyticsRoutes = (await import('./routes/analytics.js')).default;
-    const youtubeRoutes = (await import('./routes/youtube.js')).default;
-    const trendsRoutes = (await import('./routes/trends.js')).default;
-    const geminiRoutes = (await import('./routes/gemini.js')).default;
-    const collectRoutes = (await import('./routes/collect.js')).default;
-    const videoAnalyzerRoutes = (await import('./routes/video.js')).default;
-    const savedIdeasRoutes = (await import('./routes/savedIdeas.js')).default;
+// Register Routes synchronously
+console.log('[Startup] Registering routes...');
+app.use('/api/auth', authRoutes);
+app.use('/api/videos', videoRoutes);
+app.use('/api/creators', creatorRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/youtube', youtubeRoutes);
+app.use('/api/trends', trendsRoutes);
+app.use('/api/gemini', geminiRoutes);
+app.use('/api/collect', collectRoutes);
+app.use('/api/video', videoAnalyzerRoutes);
+app.use('/api/saved-ideas', savedIdeasRoutes);
+console.log('[Startup] ✓ All routes registered successfully');
 
-    // Routes
-    console.log('[Startup] Registering routes...');
-    app.use('/api/auth', authRoutes);
-    app.use('/api/videos', videoRoutes);
-    app.use('/api/creators', creatorRoutes);
-    app.use('/api/categories', categoryRoutes);
-    app.use('/api/analytics', analyticsRoutes);
-    app.use('/api/youtube', youtubeRoutes);
-    app.use('/api/trends', trendsRoutes);
-    app.use('/api/gemini', geminiRoutes);
-    app.use('/api/collect', collectRoutes);
-    app.use('/api/video', videoAnalyzerRoutes);
-    app.use('/api/saved-ideas', savedIdeasRoutes);
-    console.log('[Startup] ✓ All routes registered successfully');
+// Start server only if not running on Vercel
+if (!process.env.VERCEL) {
+  const server = app.listen(PORT, () => {
+    console.log(`\n✓ Server started successfully`);
+    console.log(`  📍 Backend: http://localhost:${PORT}`);
+    console.log(`  📍 Frontend: ${process.env.FRONTEND_URL || 'http://localhost:8080'}`);
+    console.log(`  📊 Video Analyzer endpoint: http://localhost:${PORT}/api/video/analyze`);
+    console.log(`  🔍 Debug endpoint: http://localhost:${PORT}/api/video/debug`);
+    
+    // Initialize cron jobs after server starts
+    initializeCronJobs();
+  });
 
-    // Start server only if not running on Vercel
-    if (!process.env.VERCEL) {
-      const server = app.listen(PORT, () => {
-        console.log(`\n✓ Server started successfully`);
-        console.log(`  📍 Backend: http://localhost:${PORT}`);
-        console.log(`  📍 Frontend: ${process.env.FRONTEND_URL || 'http://localhost:8080'}`);
-        console.log(`  📊 Video Analyzer endpoint: http://localhost:${PORT}/api/video/analyze`);
-        console.log(`  🔍 Debug endpoint: http://localhost:${PORT}/api/video/debug`);
-        if (!dbConnection) {
-          console.log(`  ⚠️  Database unavailable - some features may not work\n`);
-        } else {
-          console.log(`  ✓ Database connected\n`);
-        }
-        
-        // Initialize cron jobs after server starts
-        initializeCronJobs();
-      });
-
-      // Handle graceful shutdown
-      process.on('SIGINT', async () => {
-        console.log('\nShutting down gracefully...');
-        stopCronJobs();
-        server.close(async () => {
-          await closeDB();
-          process.exit(0);
-        });
-      });
-    }
-  } catch (error) {
-    console.error('[Startup Error]', error);
-    process.exit(1);
-  }
+  // Handle graceful shutdown
+  process.on('SIGINT', async () => {
+    console.log('\nShutting down gracefully...');
+    stopCronJobs();
+    server.close(async () => {
+      await closeDB();
+      process.exit(0);
+    });
+  });
 }
-
-// Ensure routes are loaded before Vercel serves the app by using top-level await if possible
-// However, top-level await works in ES modules but Vercel needs the app exported. 
-// Vercel handles requests asynchronously, so we can just export app.
-loadRoutes();
 
 export default app;
